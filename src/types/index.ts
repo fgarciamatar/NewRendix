@@ -17,6 +17,17 @@ export interface Category {
   bgColor: string;
 }
 
+export type CashDetailKind = 'efectivo' | 'cambio';
+
+export interface CashBreakdown {
+  [denomination: number]: number;
+}
+
+export interface CashDetail {
+  kind: CashDetailKind;
+  breakdown: CashBreakdown;
+}
+
 export interface Movement {
   id: string;
   type: MovementType;
@@ -29,6 +40,7 @@ export interface Movement {
   note?: string;
   createdAt: number; // Timestamp
   updatedAt?: number;
+  cashDetail?: CashDetail;
 }
 
 export type CurrencyCode = 'USD' | 'ARS' | 'EUR' | 'MXN' | 'BRL' | 'CLP';

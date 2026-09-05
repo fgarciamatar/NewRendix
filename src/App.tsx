@@ -18,6 +18,7 @@ import { SummarySection } from './components/SummarySection';
 import { FilterBar } from './components/FilterBar';
 import { MovementList } from './components/MovementList';
 import { MovementFormModal } from './components/MovementFormModal';
+import { CashDetailModal } from './components/CashDetailModal';
 import { ConfirmModal } from './components/ConfirmModal';
 import { ToastContainer } from './components/ToastContainer';
 
@@ -54,6 +55,7 @@ export function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalInitialType, setModalInitialType] = useState<MovementType>('entrada');
   const [editingMovement, setEditingMovement] = useState<Movement | null>(null);
+  const [isCashModalOpen, setIsCashModalOpen] = useState(false);
 
   const [confirmConfig, setConfirmConfig] = useState<{
     isOpen: boolean;
@@ -103,7 +105,12 @@ export function App() {
     setIsModalOpen(true);
   }, []);
 
-  // Keyboard Shortcuts (Ctrl + Q for Entrada, Ctrl + M for Salida)
+  // Open modal for cash detail (efectivo / cambio)
+  const handleOpenCashDetailModal = useCallback(() => {
+    setIsCashModalOpen(true);
+  }, []);
+
+  // Keyboard Shortcuts (Ctrl + Q for Entrada, Ctrl + M for Salida, Ctrl + B for Detalle Efectivo)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const isCtrlOrCmd = e.ctrlKey || e.metaKey;
@@ -121,12 +128,15 @@ export function App() {
       } else if (isCtrlOrCmd && key === 'm') {
         e.preventDefault();
         handleOpenAddModal('salida');
+      } else if (isCtrlOrCmd && key === 'b') {
+        e.preventDefault();
+        handleOpenCashDetailModal();
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleOpenAddModal]);
+  }, [handleOpenAddModal, handleOpenCashDetailModal]);
 
   // Handle PDF export
   const handleExportPDF = () => {
@@ -233,7 +243,13 @@ export function App() {
       };
       setMovements(prev => [newMovement, ...prev]);
 
-      if (movementData.type === 'entrada') {
+      if (movementData.cashDetail) {
+        const label = movementData.cashDetail.kind === 'efectivo' ? 'Detalle Efectivo' : 'Detalle Cambio';
+        if (movementData.type === 'entrada') {
+          confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 } });
+        }
+        addToast('success', `${label} registrado`, `${movementData.type === 'entrada' ? '+' : '-'}${formatCurrency(movementData.amount)} guardado en ${movementData.type === 'entrada' ? 'entradas' : 'salidas'}`);
+      } else if (movementData.type === 'entrada') {
         confetti({
           particleCount: 50,
           spread: 60,
@@ -283,6 +299,7 @@ export function App() {
         onToggleTheme={toggleTheme}
         onExportPDF={handleExportPDF}
         onClearAll={handleClearAllRequest}
+        onOpenCashDetail={handleOpenCashDetailModal}
         activeShift={activeShift}
         onShiftChange={setActiveShift}
       />
@@ -325,6 +342,14 @@ export function App() {
         onSave={handleSaveMovement}
         initialType={modalInitialType}
         editingMovement={editingMovement}
+      />
+
+      {/* Cash Detail Modal (Efectivo / Cambio) */}
+      <CashDetailModal
+        isOpen={isCashModalOpen}
+        onClose={() => setIsCashModalOpen(false)}
+        onSave={handleSaveMovement}
+        movements={movements}
       />
 
       {/* Confirmation Dialog */}
