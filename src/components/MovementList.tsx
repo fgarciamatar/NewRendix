@@ -25,7 +25,8 @@ import {
   Megaphone,
   MoreHorizontal,
   Sun,
-  Moon
+  Moon,
+  DollarSign
 } from 'lucide-react';
 
 interface MovementListProps {
@@ -51,6 +52,7 @@ const getCategoryIcon = (iconName: string, color: string) => {
     case 'FileText': return <FileText {...props} />;
     case 'Truck': return <Truck {...props} />;
     case 'Megaphone': return <Megaphone {...props} />;
+    case 'DollarSign': return <DollarSign {...props} />;
     default: return <MoreHorizontal {...props} />;
   }
 };
@@ -104,7 +106,8 @@ export const MovementList: React.FC<MovementListProps> = ({
         <tr key={item.id}>
           {/* Concept */}
           <td>
-            <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.85rem' }}>
+            <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '5px' }}>
+              {item.cashDetail && <DollarSign size={14} style={{ color: '#10b981', flexShrink: 0 }} />}
               {item.concept}
             </div>
             {item.note && (

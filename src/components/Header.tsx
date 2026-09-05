@@ -1,10 +1,11 @@
 import React from 'react';
-import { 
-  Sun, 
-  Moon, 
+import {
+  Sun,
+  Moon,
   FileText,
   Trash2,
-  Clock
+  Clock,
+  DollarSign
 } from 'lucide-react';
 import { LogoIcon } from './LogoIcon';
 
@@ -13,6 +14,7 @@ interface HeaderProps {
   onToggleTheme: () => void;
   onExportPDF: () => void;
   onClearAll: () => void;
+  onOpenCashDetail: () => void;
   activeShift: 'Mañana' | 'Tarde';
   onShiftChange: (shift: 'Mañana' | 'Tarde') => void;
 }
@@ -22,6 +24,7 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleTheme,
   onExportPDF,
   onClearAll,
+  onOpenCashDetail,
   activeShift,
   onShiftChange
 }) => {
@@ -77,9 +80,20 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
+        {/* Cash Detail Button */}
+        <button
+          className="btn btn-cash-detail"
+          onClick={onOpenCashDetail}
+          title="Registrar detalle de billetes de Efectivo o Cambio · Acceso rápido: Ctrl + B"
+        >
+          <DollarSign size={16} style={{ color: '#10b981' }} />
+          <span>Detalle Efectivo</span>
+          <kbd className="kbd-shortcut">Ctrl+B</kbd>
+        </button>
+
         {/* PDF Export Only Button */}
-        <button 
-          className="btn btn-secondary" 
+        <button
+          className="btn btn-secondary"
           onClick={onExportPDF}
           title="Exportar Planilla PDF con Entradas, Salidas y Balance"
         >

@@ -3,6 +3,7 @@ import autoTable from 'jspdf-autotable';
 import type { Movement } from '../types';
 import { formatCurrency, formatDateTime, getShiftFromDateString } from './formatters';
 import { CATEGORIES, PAYMENT_METHODS } from '../constants/categories';
+import { CASH_DENOMINATIONS } from '../constants/cash';
 
 export const exportMovementsToPDF = (movements: Movement[], activeShift: 'Mañana' | 'Tarde' = 'Tarde') => {
   const doc = new jsPDF({
@@ -174,6 +175,85 @@ export const exportMovementsToPDF = (movements: Movement[], activeShift: 'Mañan
   if (currentY > 230) {
     doc.addPage();
     currentY = 20;
+  }
+
+  // --- DETALLE DE EFECTIVO (solo "efectivo", el "cambio" no se imprime) ---
+  const cashDetailsToPrint = movements.filter(m => m.cashDetail && m.cashDetail.kind === 'efectivo');
+
+  if (cashDetailsToPrint.length > 0) {
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.setTextColor(16, 185, 129); // Emerald green
+    doc.text(`3. DETALLE DE EFECTIVO (${cashDetailsToPrint.length})`, 14, currentY);
+    currentY += 6;
+
+    cashDetailsToPrint.forEach((m) => {
+      const breakdown = m.cashDetail!.breakdown;
+      const rows = CASH_DENOMINATIONS
+        .filter(denom => (breakdown[denom] || 0) > 0)
+        .map(denom => [
+          `$ ${denom.toLocaleString('es-AR')}`,
+          String(breakdown[denom]),
+          formatCurrency(denom * breakdown[denom])
+        ]);
+
+      if (rows.length === 0) {
+        rows.push(['-', '-', formatCurrency(0)]);
+      }
+
+      if (currentY > 250) {
+        doc.addPage();
+        currentY = 20;
+      }
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9.5);
+      doc.setTextColor(71, 85, 105);
+      doc.text(
+        `${m.concept} · ${m.type === 'entrada' ? 'Entrada' : 'Salida'} · ${formatDateTime(m.date)}${m.note ? ` · ${m.note}` : ''}`,
+        14,
+        currentY
+      );
+
+      autoTable(doc, {
+        startY: currentY + 3,
+        head: [['Denominación', 'Cantidad', 'Subtotal']],
+        body: rows,
+        foot: [['TOTAL', '', formatCurrency(m.amount)]],
+        theme: 'grid',
+        headStyles: {
+          fillColor: [16, 185, 129],
+          textColor: [255, 255, 255],
+          fontStyle: 'bold',
+          fontSize: 8.5
+        },
+        footStyles: {
+          fillColor: [236, 253, 245],
+          textColor: [6, 95, 70],
+          fontStyle: 'bold',
+          fontSize: 9
+        },
+        styles: {
+          fontSize: 8,
+          cellPadding: 2
+        },
+        columnStyles: {
+          0: { cellWidth: 60 },
+          1: { cellWidth: 40, halign: 'center' },
+          2: { cellWidth: 40, halign: 'right', fontStyle: 'bold' }
+        },
+        margin: { left: 14 }
+      });
+
+      // @ts-ignore
+      currentY = (doc as any).lastAutoTable.finalY + 8;
+    });
+
+    currentY += 4;
+    if (currentY > 230) {
+      doc.addPage();
+      currentY = 20;
+    }
   }
 
   // --- RESUMEN FINAL / BALANCE (ENTRADAS - SALIDAS) ---

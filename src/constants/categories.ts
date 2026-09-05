@@ -13,7 +13,9 @@ export const CATEGORIES: Category[] = [
   { id: 'Transferencia', name: 'Transferencia', type: 'salida', icon: 'Users', color: '#e11d48', bgColor: 'rgba(225, 29, 72, 0.15)' },
 
   // Ambos
-  { id: 'otros', name: 'Otros / Varios', type: 'both', icon: 'MoreHorizontal', color: '#6b7280', bgColor: 'rgba(107, 114, 128, 0.15)' }
+  { id: 'otros', name: 'Otros / Varios', type: 'both', icon: 'MoreHorizontal', color: '#6b7280', bgColor: 'rgba(107, 114, 128, 0.15)' },
+  { id: 'detalle_efectivo', name: 'Detalle Efectivo', type: 'both', icon: 'DollarSign', color: '#10b981', bgColor: 'rgba(16, 185, 129, 0.15)' },
+  { id: 'detalle_cambio', name: 'Detalle Cambio', type: 'both', icon: 'DollarSign', color: '#10b981', bgColor: 'rgba(16, 185, 129, 0.15)' }
 ];
 
 export const PAYMENT_METHODS: { id: PaymentMethod; label: string; icon: string }[] = [
